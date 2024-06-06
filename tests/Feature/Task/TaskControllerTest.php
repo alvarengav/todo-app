@@ -14,6 +14,10 @@ beforeEach(function () {
 });
 
 it('can create task', function () {
+    $headers = [
+        'Accept' => 'application/json',
+    ];
+
     $response = $this->postJson('/api/tasks', [
         'title' => 'New Task',
         'description' => 'Description of the task',
@@ -21,7 +25,7 @@ it('can create task', function () {
         'is_completed' => false,
         'due_date' => now()->addDays(7)->toDateTimeString(),
         'user_id' => $this->user->id,
-    ]);
+    ], $headers);
 
     $response->assertStatus(201)
         ->assertJson([
@@ -38,8 +42,6 @@ it('can create task', function () {
         'is_completed' => false,
         'user_id' => $this->user->id,
     ]);
-
-    $response->assertStatus(200);
 });
 
 it('can get tasks', function () {
@@ -81,12 +83,12 @@ it('can update a task', function () {
         'is_completed' => true,
     ]);
 
-    $response = $this->putJson("/api/tasks/{$task->id}", $new_task_data);
+    $response = $this->putJson("/api/tasks/{$task->id}", $new_task_data->all());
 
     $response->assertStatus(200)
-        ->assertJson($new_task_data);
+        ->assertJson($new_task_data->all());
 
-    $this->assertDatabaseHas('tasks', $new_task_data->merge(['id' => $this->user->id]));
+    $this->assertDatabaseHas('tasks', $new_task_data->merge(['user_id' => $this->user->id])->all());
 });
 
 it('can delete task', function () {
@@ -94,6 +96,6 @@ it('can delete task', function () {
 
     $response = $this->deleteJson("/api/tasks/{$task->id}");
 
-    $response->assertJson(204)
-        ->assertDatabaseMissing('tasks', ['id' => $task->id]);
+    $response->assertStatus(204);
+    $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
 });
