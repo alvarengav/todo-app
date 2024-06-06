@@ -2,7 +2,10 @@ import { Config } from 'ziggy-js'
 
 export interface User {
   id: number
-  name: string
+  first_name: string
+  last_name: string
+  alias: string | null
+  username: string
   email: string
   email_verified_at: string
 }
